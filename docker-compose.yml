@@ -1,0 +1,43 @@
+version: '3.3'
+
+services:
+
+  wordpress:
+    image: wordpress
+    ports:
+      - 8001:80
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpressuser
+      WORDPRESS_DB_PASSWORD: password
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - ./wordpress/www:/var/www/html
+      - ./custom/plugins/vue-plugin:/var/www/html/wp-content/plugins/vue-plugin
+    links:
+      - db:mysql
+    networks:
+      - default
+
+  db:
+    image: mysql:5.7
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpressuser
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - ./db_data:/var/lib/mysql
+    networks:
+      - default
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+      - db:db
+    ports:
+      - 8000:80
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
