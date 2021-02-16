@@ -14,6 +14,7 @@ services:
     volumes:
       - ./wordpress/www:/var/www/html
       - ./custom/plugins/vue-plugin:/var/www/html/wp-content/plugins/vue-plugin
+      - ./custom/plugins/btl_volunteer_plugin:/var/www/html/wp-content/plugins/btl_volunteer_plugin
     links:
       - db:mysql
     networks:
