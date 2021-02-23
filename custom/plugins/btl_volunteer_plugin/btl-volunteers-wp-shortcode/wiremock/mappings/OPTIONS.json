@@ -1,0 +1,14 @@
+{
+  "request": {
+    "urlPathPattern": ".*",
+    "method": "OPTIONS"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Access-Control-Allow-Origin": "http://localhost:8081",
+      "Access-Control-Allow-Headers": "content-type",
+      "Access-Control-Allow-Methods": "GET, POST"
+    }
+  }
+}

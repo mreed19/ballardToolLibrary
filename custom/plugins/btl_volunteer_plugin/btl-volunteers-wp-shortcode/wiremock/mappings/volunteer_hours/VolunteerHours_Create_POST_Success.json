@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/volunteer_hours/create"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Access-Control-Allow-Origin": "*"
+    },
+    "body": "Successfully logged volunteer hours"
+  }
+}

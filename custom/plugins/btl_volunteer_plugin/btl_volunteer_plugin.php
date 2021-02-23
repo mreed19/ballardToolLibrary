@@ -29,6 +29,24 @@ class BTLVolunteerPlugin {
 
     // Register REST API routes
     add_action('rest_api_init', [$this, 'register_routes']);
+
+    // Load Vue and create shortcode
+    add_action('wp_enqueue_scripts', [$this, 'load_vue_scripts']);
+    add_shortcode('btl-volunteers', [$this, 'load_vue_plugin_page']);
+  }
+
+  public function load_vue_scripts() {
+    $vueDirectory = join(DIRECTORY_SEPARATOR, [plugin_dir_url(__FILE__), 'btl-volunteers-wp-shortcode', 'dist']);
+    wp_register_style('backend-vue-style', $vueDirectory . '/app.css');
+    wp_register_script('backend-vue-script', $vueDirectory . '/app.js', [], '1.0.0', true);
+  }
+
+  public function load_vue_plugin_page() {
+    wp_enqueue_style('backend-vue-style');
+    wp_enqueue_script('backend-vue-script');
+
+    $template = '<div class="wrap"><div id="app"></div></div>';
+    return $template;
   }
 
   public function register_routes() {
@@ -53,13 +71,25 @@ class BTLVolunteerPlugin {
       'callback' => array($this, 'get_volunteer_hours_by_date_range'),
       'args' => array(
         'start_date' => array(
-          'required' => true
+          'required' => true,
+          'validate_callback' => function($param) {
+            return $this->validateDate($param);
+          }
         ),
         'end_date' => array(
-          'required' => true
+          'required' => true,
+          'validate_callback' => function($param) {
+            return $this->validateDate($param);
+          }
         )
       )
     ));
+  }
+
+  public function validateDate($date, $format = 'Y-m-d') {
+    $d = DateTime::CreateFromFormat($format, $date);
+
+    return $d && $d->format($format) === $date;
   }
 
   public function volunteer_db_install() {
@@ -125,11 +155,11 @@ class BTLVolunteerPlugin {
   public function get_volunteer_hours_by_date_range(WP_REST_Request $request) {
     $params = $request->get_query_params();
     $start_date = $params['start_date'];
+    $end_date = $params['end_date'];
 
-    $results = $this->wpdb->get_results("SELECT * FROM $this->volunteer_hours_table_name;");
+    $results = $this->wpdb->get_results("SELECT * FROM $this->volunteer_hours_table_name WHERE date_recorded BETWEEN '$start_date' AND '$end_date' ORDER BY date_recorded DESC");
+
     return $results;
-
-    // return $request->get_query_params();
   }
 
   public function volunteer_db_uninstall() {

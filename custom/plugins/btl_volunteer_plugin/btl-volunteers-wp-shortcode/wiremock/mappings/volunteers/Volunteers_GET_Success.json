@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/volunteers"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Access-Control-Allow-Origin": "*"
+    },
+    "bodyFileName": "volunteers/GetVolunteersResponse.json"
+  }
+}

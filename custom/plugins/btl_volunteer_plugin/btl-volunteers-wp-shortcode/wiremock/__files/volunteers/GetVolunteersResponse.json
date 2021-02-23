@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "first_name": "first",
+    "last_name": "last",
+    "email_address": "first@last.com",
+    "date_created": "2020-01-01T00:00:00Z"
+  },
+  {
+    "id": 2,
+    "first_name": "second",
+    "last_name": "last",
+    "email_address": "second@last.com",
+    "date_created": "2021-01-01T00:00:00Z"
+  }
+]
