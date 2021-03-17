@@ -10,7 +10,13 @@
           :defaultSortDir="volunteersTableData.defaultSortDir"
           :allowEmpty="volunteersTableData.allowEmpty"
           :queryColumn="volunteersTableData.queryColumn"
-        />
+        >
+          <template #additionalActions>
+            <router-link to="/volunteers/create" tag="button">
+              Create a new Volunteer
+            </router-link>
+          </template>
+        </SortableTable>
       </div>
     </section>
   </div>

@@ -6,7 +6,7 @@
   "response": {
     "status": 200,
     "headers": {
-      "Access-Control-Allow-Origin": "*"
+      "Access-Control-Allow-Origin": "http://localhost:8081"
     },
     "bodyFileName": "volunteer_hours/GetVolunteerHoursResponse.json"
   }

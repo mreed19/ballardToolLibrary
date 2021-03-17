@@ -1,6 +1,6 @@
 {
   "request": {
-    "method": "GET",
+    "method": "POST",
     "urlPath": "/volunteers"
   },
   "response": {
@@ -8,6 +8,6 @@
     "headers": {
       "Access-Control-Allow-Origin": "http://localhost:8081"
     },
-    "bodyFileName": "volunteers/GetVolunteersResponse.json"
+    "body": "Successfully created Volunteer"
   }
 }

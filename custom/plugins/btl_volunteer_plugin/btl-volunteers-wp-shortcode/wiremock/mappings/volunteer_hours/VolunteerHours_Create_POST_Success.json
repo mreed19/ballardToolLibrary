@@ -1,12 +1,12 @@
 {
   "request": {
     "method": "POST",
-    "urlPath": "/volunteer_hours/create"
+    "urlPath": "/volunteer_hours"
   },
   "response": {
     "status": 200,
     "headers": {
-      "Access-Control-Allow-Origin": "*"
+      "Access-Control-Allow-Origin": "http://localhost:8081"
     },
     "body": "Successfully logged volunteer hours"
   }

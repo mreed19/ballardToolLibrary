@@ -8,6 +8,17 @@ import { RootState, Volunteer, VolunteerHours } from './types';
 
 Vue.use(Vuex);
 
+const wordpressRestURL = (document.querySelector(
+  'link[rel="https://api.w.org/"]'
+) as HTMLLinkElement)?.href;
+const baseURL = wordpressRestURL
+  ? `${wordpressRestURL}btl_volunteers/v1`
+  : 'http://localhost:8080';
+const hasPrettyPermalinks = !baseURL.includes('rest_route');
+
+axios.defaults.headers.common['Cache-Control'] =
+  'no-cache, must-revalidate, max-age=0';
+
 const state: RootState = {
   volunteers: [],
   volunteerHours: []
@@ -24,7 +35,7 @@ const mutations: MutationTree<RootState> = {
 
 const actions: ActionTree<RootState, RootState> = {
   async getVolunteers({ commit }): Promise<void> {
-    const { data } = await axios.get('http://localhost:8080/volunteers');
+    const { data } = await axios.get(`${baseURL}/volunteers`);
     commit(
       'setVolunteers',
       data.map((volunteer: any) => {
@@ -39,7 +50,7 @@ const actions: ActionTree<RootState, RootState> = {
     );
   },
   async createVolunteer(context, volunteer: Volunteer): Promise<void> {
-    await axios.post('http://localhost:8080/volunteers/create', {
+    await axios.post(`${baseURL}/volunteers`, {
       first_name: volunteer.firstName,
       last_name: volunteer.lastName,
       email_address: volunteer.emailAddress
@@ -47,7 +58,11 @@ const actions: ActionTree<RootState, RootState> = {
   },
   async getVolunteerHoursByDateRange({ commit }, { startDate, endDate }) {
     const { data } = await axios.get(
-      `http://localhost:8080/volunteer_hours?start_date=${startDate}&end_date=${endDate}`
+      `${baseURL}/volunteer_hours${
+        hasPrettyPermalinks ? '?' : '&'
+      }start_date=${encodeURIComponent(
+        startDate
+      )}&end_date=${encodeURIComponent(endDate)}`
     );
     commit(
       'setVolunteerHours',
@@ -63,8 +78,7 @@ const actions: ActionTree<RootState, RootState> = {
     );
   },
   async createVolunteerHours(context, volunteerHours: VolunteerHours) {
-    console.log(volunteerHours);
-    await axios.post('http://localhost:8080/volunteer_hours/create', {
+    await axios.post(`${baseURL}/volunteer_hours`, {
       volunteer_id: volunteerHours.volunteerId,
       hours_recorded: volunteerHours.hoursRecorded,
       date_recorded: volunteerHours.dateRecorded

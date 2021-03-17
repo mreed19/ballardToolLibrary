@@ -6,8 +6,6 @@
       <router-link to="/volunteers">Volunteers</router-link>
       |
       <router-link to="/volunteers/create">Create Volunteer</router-link>
-      |
-      <router-link to="/volunteers/1">Edit Volunteer 1</router-link>
     </div>
     <router-view />
   </div>

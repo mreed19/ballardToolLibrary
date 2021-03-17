@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1>Volunteer Hours</h1>
-    <section class="volunteer-hours-form">
+    <section name="volunteer-hours-form-section">
       <form
         class="volunteer-hours-form"
         novalidate
@@ -56,7 +56,42 @@
             </md-datepicker>
           </div>
         </div>
-        <button type="submit" :disabled="$v.$invalid">Log Hours</button>
+        <button type="submit" :disabled="$v.form.$invalid">Log Hours</button>
+      </form>
+    </section>
+    <section name="date-range-form-section">
+      <form
+        class="date-range-form"
+        novalidate
+        @submit.prevent="searchDateRange"
+      >
+        <div class="form-fields">
+          <div class="datepicker-field">
+            <md-datepicker
+              :class="validatedDateFormClass('startDate')"
+              v-model="dateForm.startDate"
+              :md-disabled-dates="disabledStartDates"
+              :md-debounce="100"
+              :md-model-type="String"
+            >
+              <label>From Date</label>
+            </md-datepicker>
+          </div>
+          <div class="datepicker-field">
+            <md-datepicker
+              :class="validatedDateFormClass('endDate')"
+              v-model="dateForm.endDate"
+              :md-disabled-dates="disabledEndDates"
+              :md-debounce="100"
+              :md-model-type="String"
+            >
+              <label>To Date</label>
+            </md-datepicker>
+          </div>
+        </div>
+        <button type="submit" :disabled="$v.dateForm.$invalid">
+          Search Volunteer Hours
+        </button>
       </form>
     </section>
     <section class="volunteer-hours-list">
@@ -75,6 +110,8 @@
 </template>
 <style lang="scss" scoped></style>
 <script lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Component, Vue } from 'vue-property-decorator';
 import { validationMixin } from 'vuelidate';
 import { required, minValue } from 'vuelidate/lib/validators';
@@ -91,6 +128,24 @@ import { VolunteerHours, Volunteer } from '@/store/types';
       selectedVolunteerId: { required },
       hoursRecorded: { required, minValue: minValue(0) },
       dateRecorded: { required }
+    },
+    dateForm: {
+      startDate: {
+        required,
+        isBefore(date, dateForm) {
+          return !(this.$moment(date) as any).isAfter(
+            this.$moment(dateForm.endDate)
+          );
+        }
+      },
+      endDate: {
+        required,
+        isAfter(date, dateForm) {
+          return !(this.$moment(date) as any).isBefore(
+            this.$moment(dateForm.startDate)
+          );
+        }
+      }
     }
   }
 })
@@ -99,6 +154,15 @@ export default class VolunteerHoursView extends Vue {
     selectedVolunteerId: null,
     hoursRecorded: null,
     dateRecorded: null
+  };
+
+  dateForm = {
+    startDate: this.$moment()
+      .startOf('month')
+      .format('YYYY-MM-DD'),
+    endDate: this.$moment()
+      .endOf('month')
+      .format('YYYY-MM-DD')
   };
 
   get volunteers(): Volunteer[] {
@@ -153,13 +217,8 @@ export default class VolunteerHoursView extends Vue {
 
   mounted() {
     this.$store.dispatch('getVolunteers');
-    const startDate = this.$moment().format('YYYY-MM-DD');
-    console.log(startDate);
-    const endDate = this.$moment().format('YYYY-MM-DD');
-    console.log(endDate);
     this.$store.dispatch('getVolunteerHoursByDateRange', {
-      startDate,
-      endDate
+      ...this.dateForm
     });
   }
 
@@ -171,14 +230,29 @@ export default class VolunteerHoursView extends Vue {
     return '';
   }
 
+  validatedDateFormClass(fieldName: string): string {
+    const field = this.$v.dateForm[fieldName];
+    if (field) {
+      return field.$invalid && field.$dirty ? 'is-danger' : '';
+    }
+    return '';
+  }
+
   createVolunteerHours() {
-    this.$v.$touch();
-    if (!this.$v.$invalid) {
+    this.$v.form.$touch();
+    if (!this.$v.form.$invalid) {
       this.$store.dispatch('createVolunteerHours', {
         volunteerId: this.form.selectedVolunteerId,
         hoursRecorded: this.form.hoursRecorded,
         dateRecorded: this.form.dateRecorded
       });
+      this.$store.dispatch('getVolunteerHoursByDateRange', {
+        ...this.dateForm
+      });
+      this.form.selectedVolunteerId = null;
+      this.form.hoursRecorded = null;
+      this.form.dateRecorded = null;
+      this.$v.form.$reset();
     }
   }
 
@@ -187,6 +261,29 @@ export default class VolunteerHoursView extends Vue {
     const selectedOption = selectElement.options[selectElement.selectedIndex];
     if (selectedOption.value === 'routeToVolunteerCreate') {
       this.$router.push('/volunteers/create');
+    }
+  }
+
+  disabledStartDates(date: any) {
+    return (this.$moment(date) as any).isAfter(
+      this.$moment(this.dateForm.endDate)
+    );
+    // return false;
+  }
+
+  disabledEndDates(date: any) {
+    return (this.$moment(date) as any).isBefore(
+      this.$moment(this.dateForm.startDate)
+    );
+    // return false;
+  }
+
+  searchDateRange() {
+    this.$v.dateForm.$touch();
+    if (!this.$v.dateForm.$invalid) {
+      this.$store.dispatch('getVolunteerHoursByDateRange', {
+        ...this.dateForm
+      });
     }
   }
 }
